@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Financial Habit Builder & Wealth Growth Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f6;--card:#fff;--ink:#14213d;--mute:#5d6b82;--line:#d5dce6;--acc:#f2a900;--pos:#1b7f5c;--on:#14213d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1626;--card:#16213a;--ink:#eef2f6;--mute:#9aa8c0;--line:#2a3856;--pos:#4fd1a1;--on:#0e1626}}
+:root[data-theme="dark"]{--bg:#0e1626;--card:#16213a;--ink:#eef2f6;--mute:#9aa8c0;--line:#2a3856;--pos:#4fd1a1;--on:#0e1626}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.5}
+main{max-width:880px;margin:0 auto;padding:20px 16px 48px}
+h1{font-size:clamp(1.5rem,5vw,2.2rem);font-weight:800;margin:8px 0 4px;letter-spacing:-.02em}
+h2{font-size:1.1rem;margin:0 0 12px;font-weight:600}
+p.sub{margin:0 0 20px;color:var(--mute)}
+.hero{background:var(--ink);color:var(--bg);border-radius:20px;padding:22px;margin-bottom:16px}
+.hero small{opacity:.7}
+.big{font-size:clamp(2.2rem,9vw,3.4rem);font-weight:800;letter-spacing:-.03em;line-height:1.1}
+.bar{height:10px;background:rgba(255,255,255,.2);border-radius:9px;margin:14px 0 6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--acc);border-radius:9px;transition:width .4s}
+.grid{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:760px){.grid{grid-template-columns:1fr 1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+input{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 11px;min-width:0;flex:1}
+input[type=range]{padding:0;accent-color:var(--acc)}
+button{font:inherit;font-weight:600;cursor:pointer;border:0;border-radius:10px;padding:9px 14px;background:var(--acc);color:#14213d}
+button.ghost{background:transparent;color:var(--mute);padding:4px 8px}
+:focus-visible{outline:3px solid var(--acc);outline-offset:2px}
+.habit{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.habit:first-of-type{border-top:0}
+.habit .t{flex:1;min-width:0}
+.habit b{display:block;overflow-wrap:anywhere}
+.habit span{font-size:.85rem;color:var(--mute)}
+.dots{display:flex;gap:3px;margin-top:4px}
+.dots u{width:12px;height:12px;border-radius:4px;background:var(--line);text-decoration:none}
+.dots u.on{background:var(--pos)}
+.chk{width:44px;height:44px;border-radius:12px;border:2px solid var(--line);background:transparent;color:var(--on);font-size:1.3rem;padding:0}
+.chk.on{background:var(--pos);border-color:var(--pos);color:#fff}
+.empty{color:var(--mute);margin:4px 0 0}
+svg{width:100%;height:auto;display:block}
+.lbl{display:flex;justify-content:space-between;font-size:.9rem;color:var(--mute);margin:8px 0 4px}
+.tx{display:flex;justify-content:space-between;font-size:.9rem;padding:6px 0;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<main>
+<h1>Financial Habit Builder & Wealth Growth Tracker</h1>
+<p class="sub">Tick a money habit each day, watch the savings add up, and see where they could grow.</p>
+
+<section class="hero" aria-live="polite">
+  <small>Total saved</small>
+  <div class="big" id="total">₹0</div>
+  <div class="bar"><i id="pbar" style="width:0%"></i></div>
+  <small id="gtext"></small>
+</section>
+
+<div class="grid">
+  <section class="card">
+    <h2>Daily money habits</h2>
+    <form class="row" id="hf" onsubmit="return false">
+      <input id="hn" placeholder="Habit (e.g. Skip takeaway)" maxlength="60" aria-label="Habit name">
+      <input id="ha" type="number" min="0" placeholder="₹ saved per day" aria-label="Amount saved per day" style="max-width:130px">
+      <button id="hadd" type="button">Add habit</button>
+    </form>
+    <div id="habits"></div>
+  </section>
+
+  <section class="card">
+    <h2>Savings goal & deposits</h2>
+    <div class="row">
+      <input id="goal" type="number" min="0" placeholder="Goal in ₹" aria-label="Savings goal">
+      <button id="gset" type="button">Set goal</button>
+    </div>
+    <div class="row">
+      <input id="da" type="number" min="1" placeholder="Deposit ₹" aria-label="Deposit amount">
+      <input id="dn" placeholder="Note (optional)" maxlength="40" aria-label="Deposit note">
+      <button id="dadd" type="button">Add deposit</button>
+    </div>
+    <div id="deps"></div>
+  </section>
+
+  <section class="card" style="grid-column:1/-1">
+    <h2>Wealth growth projection</h2>
+    <div class="lbl"><span>Monthly saving: <b id="mv"></b></span></div>
+    <input type="range" id="mon" min="0" max="50000" step="500" aria-label="Monthly saving">
+    <div class="lbl"><span>Yearly return: <b id="rv"></b></span></div>
+    <input type="range" id="rate" min="0" max="20" step="0.5" value="8" aria-label="Yearly return percent">
+    <div class="lbl"><span>Years: <b id="yv"></b></span></div>
+    <input type="range" id="yrs" min="1" max="30" step="1" value="10" aria-label="Years">
+    <svg id="chart" viewBox="0 0 600 240" role="img" aria-label="Projected wealth over time"></svg>
+    <p id="proj" class="empty"></p>
+  </section>
+</div>
+</main>
+<script>
+const KEY="fhb-v1",$=id=>document.getElementById(id);
+const inr=n=>"₹"+Math.round(n).toLocaleString("en-IN");
+const ds=d=>d.toISOString().slice(0,10);
+const today=()=>ds(new Date());
+let S={habits:[],deposits:[],goal:100000,monthly:null};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=s=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function streak(h){let n=0,d=new Date();if(!h.days[ds(d)])d.setDate(d.getDate()-1);
+  while(h.days[ds(d)]){n++;d.setDate(d.getDate()-1)}return n}
+function habitTotal(h){return Object.keys(h.days).length*h.amt}
+function total(){return S.habits.reduce((a,h)=>a+habitTotal(h),0)+S.deposits.reduce((a,d)=>a+d.amt,0)}
+function last30(){const c=new Date();c.setDate(c.getDate()-30);const k=ds(c);
+  let s=0;S.habits.forEach(h=>Object.keys(h.days).forEach(d=>{if(d>k)s+=h.amt}));
+  S.deposits.forEach(d=>{if(d.date>k)s+=d.amt});return s}
+
+function render(){
+  const t=total();$("total").textContent=inr(t);
+  const p=S.goal>0?Math.min(100,t/S.goal*100):0;
+  $("pbar").style.width=p+"%";
+  $("gtext").textContent=S.goal>0?`${p.toFixed(0)}% of ${inr(S.goal)} goal`:"Set a goal to track progress";
+  $("goal").value=S.goal||"";
+
+  const hs=$("habits");
+  if(!S.habits.length)hs.innerHTML='<p class="empty">No habits yet. Add one above, like “Cook at home”.</p>';
+  else hs.innerHTML=S.habits.map(h=>{
+    const done=!!h.days[today()];
+    let dots="";for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);dots+=`<u class="${h.days[ds(d)]?"on":""}"></u>`}
+    return `<div class="habit"><button class="chk ${done?"on":""}" data-t="${h.id}" aria-pressed="${done}" aria-label="Mark ${esc(h.name)} done today">${done?"✓":""}</button>
+    <div class="t"><b>${esc(h.name)}</b><span>${inr(h.amt)}/day · ${streak(h)}-day streak · saved ${inr(habitTotal(h))}</span><div class="dots" aria-hidden="true">${dots}</div></div>
+    <button class="ghost" data-x="${h.id}" aria-label="Delete ${esc(h.name)}">Delete</button></div>`}).join("");
+
+  const dp=$("deps");
+  dp.innerHTML=S.deposits.length?S.deposits.slice().reverse().slice(0,6).map(d=>`<div class="tx"><span>${d.date}${d.note?" · "+esc(d.note):""}</span><span><b>${inr(d.amt)}</b> <button class="ghost" data-d="${d.id}" aria-label="Remove deposit">✕</button></span></div>`).join(""):'<p class="empty">No deposits yet.</p>';
+  project();
+}
+
+function project(){
+  const base=Math.round(last30()/500)*500;
+  if(S.monthly===null)S.monthly=Math.min(50000,base||5000);
+  $("mon").value=S.monthly;
+  const m=+$("mon").value,r=+$("rate").value,y=+$("yrs").value;
+  $("mv").textContent=inr(m)+"/mo";$("rv").textContent=r+"%";$("yv").textContent=y;
+  const mr=r/100/12;let v=total(),inv=v;const pts=[v];
+  for(let i=1;i<=y*12;i++){v=v*(1+mr)+m;inv+=m;if(i%12===0)pts.push(v)}
+  const max=Math.max(...pts,1),W=600,H=240,pad=8;
+  const x=i=>pad+i/(pts.length-1||1)*(W-2*pad),yy=val=>H-pad-val/max*(H-2*pad);
+  let invPts=[total()];for(let i=1;i<=y;i++)invPts.push(total()+m*12*i);
+  const line=a=>a.map((p,i)=>(i?"L":"M")+x(i).toFixed(1)+" "+yy(p).toFixed(1)).join(" ");
+  $("chart").innerHTML=`<path d="${line(pts)} L${x(pts.length-1)} ${H-pad} L${x(0)} ${H-pad}Z" fill="#f2a900" opacity=".18"/>
+  <path d="${line(invPts)}" fill="none" stroke="#5d6b82" stroke-width="2" stroke-dasharray="5 4"/>
+  <path d="${line(pts)}" fill="none" stroke="#f2a900" stroke-width="3.5" stroke-linejoin="round"/>`;
+  $("proj").innerHTML=`In ${y} years: <b>${inr(v)}</b>, of which <b style="color:var(--pos)">${inr(v-inv)}</b> is growth. Dashed line = savings without returns.`;
+}
+
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.t){const h=S.habits.find(h=>h.id===b.dataset.t),k=today();h.days[k]?delete h.days[k]:h.days[k]=1}
+  else if(b.dataset.x){S.habits=S.habits.filter(h=>h.id!==b.dataset.x)}
+  else if(b.dataset.d){S.deposits=S.deposits.filter(d=>d.id!==b.dataset.d)}
+  else if(b.id==="hadd"){const n=$("hn").value.trim(),a=+$("ha").value;if(!n||!(a>=0))return $("hn").focus();
+    S.habits.push({id:uid(),name:n,amt:a||0,days:{}});$("hn").value=$("ha").value=""}
+  else if(b.id==="dadd"){const a=+$("da").value;if(!(a>0))return $("da").focus();
+    S.deposits.push({id:uid(),amt:a,note:$("dn").value.trim(),date:today()});$("da").value=$("dn").value=""}
+  else if(b.id==="gset"){S.goal=Math.max(0,+$("goal").value||0)}
+  else return;
+  save();render();
+});
+$("mon").oninput=()=>{S.monthly=+$("mon").value;save();project()};
+$("rate").oninput=$("yrs").oninput=project;
+render();
+</script>
+</body>
+</html>
